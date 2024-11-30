@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -26,23 +27,26 @@ public class Alarm extends BaseEntity {
     @Column(nullable = false)
     private LocalTime time; // 설정 시간
 
-    private LocalTime date; // 설정 날짜
+    private LocalDate date; // 설정 날짜
 
     @Column(length = 7)
     private int daysOfWeek; // 반복 요일
 
+    private boolean isRepetition; // 반복여부
 
-    public Alarm create(LocalTime time, LocalTime date, int daysOfWeek) {
+    public static Alarm create(LocalTime time, LocalDate date, int daysOfWeek) {
         return Alarm.builder()
                 .time(time)
                 .date(date)
                 .daysOfWeek(daysOfWeek)
+                .isRepetition(daysOfWeek != 0)
                 .build();
     }
 
-    public void update(LocalTime time, LocalTime date, int daysOfWeek) {
+    public void update(LocalTime time, LocalDate date, int daysOfWeek) {
         this.time = time;
         this.date = date;
         this.daysOfWeek = daysOfWeek;
+        this.isRepetition = daysOfWeek != 0;
     }
 }
