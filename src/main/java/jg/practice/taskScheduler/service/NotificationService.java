@@ -29,11 +29,10 @@ public class NotificationService {
             }
         } catch (IllegalArgumentException e) {
             // 발송 실패 시 CANCEL 처리 - 보상 트랜잭션
-            AlarmHistory alarmHistory = alarmHistoryJpaRepository.findById(notificationDto.getAlIdx())
+            AlarmHistory alarmHistory = alarmHistoryJpaRepository.findById(notificationDto.getAhIdx())
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 객체"));
             alarmHistory.setAlStatus(AlarmStatus.CANCEL);
             alarmHistoryJpaRepository.save(alarmHistory);
         }
-
     }
 }

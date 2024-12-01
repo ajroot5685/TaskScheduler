@@ -42,7 +42,7 @@ public class AlarmTaskService {
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void registerNextRepetitionAlarm(Alarm alarm) {
-        LocalDateTime nextAlarmTime = getNextAlarmTimeInRepetition(alarm);
+        LocalDateTime nextAlarmTime = getNextAlarmTimeInRepetition(alarm).plusMinutes(31);
         publish(alarm, nextAlarmTime);
     }
 
@@ -68,13 +68,15 @@ public class AlarmTaskService {
 
     private void publish(Alarm alarm, LocalDateTime nextAlarmTime) {
         // 설정 시간에서 예상 소요 시간, 30분(여유시간) 빼기
-        Instant alarmSendAt = nextAlarmTime.minusMinutes(30).atZone(ZoneId.of("Asia/Seoul")).toInstant();
-        AlarmHistory alarmHistory = AlarmHistory.create(alarm);
+        LocalDateTime alarmSendAt = nextAlarmTime.minusMinutes(30);
+        Instant instant = alarmSendAt.atZone(ZoneId.of("Asia/Seoul")).toInstant();
+
+        AlarmHistory alarmHistory = AlarmHistory.create(alarm, alarmSendAt);
         alarmHistory = alarmHistoryJpaRepository.save(alarmHistory);
 
         AlarmTaskDto alarmTaskDto = AlarmTaskDto.builder()
-                .alIdx(alarmHistory.getAhIdx())
-                .instant(alarmSendAt)
+                .ahIdx(alarmHistory.getAhIdx())
+                .instant(instant)
                 .build();
         eventPublisher.publishEvent(alarmTaskDto);
     }

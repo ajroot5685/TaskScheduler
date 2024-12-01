@@ -9,10 +9,12 @@ import jg.practice.taskScheduler.repository.AlarmJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class TaskLogic {
+public class TaskLogicService {
 
     private final AlarmJpaRepository alarmJpaRepository;
     private final AlarmHistoryJpaRepository alarmHistoryJpaRepository;
@@ -21,13 +23,14 @@ public class TaskLogic {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    public void alarmTask(Long alIdx) {
-        AlarmHistory alarmHistory = alarmHistoryJpaRepository.findById(alIdx)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void alarmTask(Long ahIdx) {
+        AlarmHistory alarmHistory = alarmHistoryJpaRepository.findById(ahIdx)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 객체"));
 
         Alarm alarm = alarmHistory.getAlarm();
 
-        if (alarm.isRepetition()) {
+        if (!alarm.isRepetition()) {
             alarm.setActivate(false);
             alarmJpaRepository.save(alarm);
         } else {
@@ -38,7 +41,7 @@ public class TaskLogic {
         if (alarm.isActivate()) {
             // 기타 설정에 따라 알림 전송
             NotificationDto notificationDto = NotificationDto.builder()
-                    .alIdx(alIdx)
+                    .ahIdx(ahIdx)
                     .title("알림 제목")
                     .content("알림 내용")
                     .deviceToken("디바이스 토큰")
@@ -47,6 +50,9 @@ public class TaskLogic {
         }
 
         // 비동기 알림발송 로직에서 발송실패 시 CANCEL로 수정
+
+        alarmHistory.setTitle("알림 제목");
+        alarmHistory.setContent("알림 내용");
         alarmHistory.setAlStatus(AlarmStatus.COMPLETE);
         alarmHistoryJpaRepository.save(alarmHistory);
     }

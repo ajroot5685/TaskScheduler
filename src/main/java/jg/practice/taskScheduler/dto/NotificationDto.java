@@ -7,7 +7,7 @@ import lombok.Getter;
 @Builder
 public class NotificationDto {
 
-    private Long alIdx;
+    private Long ahIdx;
     private String title;
     private String content;
     private String deviceToken;

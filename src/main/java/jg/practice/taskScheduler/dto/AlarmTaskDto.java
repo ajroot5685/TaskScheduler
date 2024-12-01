@@ -10,6 +10,6 @@ import lombok.Setter;
 @Builder
 public class AlarmTaskDto {
 
-    private Long alIdx;
+    private Long ahIdx;
     private Instant instant;
 }

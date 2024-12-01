@@ -1,6 +1,5 @@
 package jg.practice.taskScheduler.service;
 
-import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import jg.practice.taskScheduler.dto.request.AlarmCreateReq;
 import jg.practice.taskScheduler.dto.request.AlarmUpdateReq;
@@ -12,9 +11,11 @@ import jg.practice.taskScheduler.repository.AlarmHistoryJpaRepository;
 import jg.practice.taskScheduler.repository.AlarmJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(isolation = Isolation.REPEATABLE_READ)
 @RequiredArgsConstructor
 public class AlarmService {
 

@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDateTime;
 import jg.practice.taskScheduler.entity.enums.AlarmStatus;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -31,10 +32,12 @@ public class AlarmHistory extends BaseEntity {
 
     @Column(nullable = false)
     @Builder.Default
+    @Setter
     private String title = ""; // 알림 제목
 
     @Column(nullable = false)
     @Builder.Default
+    @Setter
     private String content = ""; // 알림 내용
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -46,10 +49,14 @@ public class AlarmHistory extends BaseEntity {
     @Setter
     private AlarmStatus alStatus;
 
-    public static AlarmHistory create(Alarm alarm) {
+    @Column(nullable = false)
+    private LocalDateTime sendAt; // 실제 알림 발송시간
+
+    public static AlarmHistory create(Alarm alarm, LocalDateTime sendAt) {
         return AlarmHistory.builder()
                 .alarm(alarm)
                 .alStatus(AlarmStatus.PENDING)
+                .sendAt(sendAt)
                 .build();
     }
 }

@@ -1,20 +1,43 @@
 package jg.practice.taskScheduler.service;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.List;
 import jg.practice.taskScheduler.dto.AlarmTaskDto;
+import jg.practice.taskScheduler.entity.AlarmHistory;
+import jg.practice.taskScheduler.entity.enums.AlarmStatus;
+import jg.practice.taskScheduler.repository.AlarmHistoryJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @RequiredArgsConstructor
 public class AlarmTaskEventListener {
 
-    private final TaskLogic taskLogic;
+    private final TaskLogicService taskLogicService;
+    private final AlarmHistoryJpaRepository alarmHistoryJpaRepository;
+
     private final ThreadPoolTaskScheduler taskScheduler;
 
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void registerTask(AlarmTaskDto alarmTaskDto) {
-        taskScheduler.schedule(() -> taskLogic.alarmTask(alarmTaskDto.getAlIdx()), alarmTaskDto.getInstant());
+        taskScheduler.schedule(() -> taskLogicService.alarmTask(alarmTaskDto.getAhIdx()), alarmTaskDto.getInstant());
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    @Transactional(readOnly = true)
+    public void reRegistrationPendingAlarms() {
+        List<AlarmHistory> alarmHistories = alarmHistoryJpaRepository.findAllByAlStatus(AlarmStatus.PENDING);
+
+        alarmHistories.forEach(alarmHistory -> {
+            Instant instant = alarmHistory.getSendAt().atZone(ZoneId.of("Asia/Seoul")).toInstant();
+            taskScheduler.schedule(() -> taskLogicService.alarmTask(alarmHistory.getAhIdx()), instant);
+        });
     }
 }
