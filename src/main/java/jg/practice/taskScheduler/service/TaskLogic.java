@@ -17,6 +17,8 @@ public class TaskLogic {
     private final AlarmJpaRepository alarmJpaRepository;
     private final AlarmHistoryJpaRepository alarmHistoryJpaRepository;
 
+    private final AlarmTaskService alarmTaskService;
+
     private final ApplicationEventPublisher eventPublisher;
 
     public void alarmTask(Long alIdx) {
@@ -30,7 +32,7 @@ public class TaskLogic {
             alarmJpaRepository.save(alarm);
         } else {
             // 다음 반복 알림 설정 - 비동기
-
+            alarmTaskService.registerNextRepetitionAlarm(alarm);
         }
 
         if (alarm.isActivate()) {
