@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -34,12 +35,16 @@ public class Alarm extends BaseEntity {
 
     private boolean isRepetition; // 반복여부
 
+    @Setter
+    private boolean activate; // 사용자 설정에 따라 실행 여부를 결정하는 필드들(ex. 알림 on/off, 푸시알림 동의, 공휴일 등)
+
     public static Alarm create(LocalTime time, LocalDate date, int daysOfWeek) {
         return Alarm.builder()
                 .time(time)
                 .date(date)
                 .daysOfWeek(daysOfWeek)
                 .isRepetition(daysOfWeek != 0)
+                .activate(true)
                 .build();
     }
 

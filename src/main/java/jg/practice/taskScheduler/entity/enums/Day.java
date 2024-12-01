@@ -23,21 +23,21 @@ public enum Day {
     private final int value;
     private final DayOfWeek dayOfWeek;
 
+    public static int getDaysOfWeek(List<Day> req) {
+        int daysOfWeek = 0;
+        if (req != null && !req.isEmpty()) {
+            for (Day day : req) {
+                daysOfWeek |= day.getValue();
+            }
+        }
+        return daysOfWeek;
+    }
+
     public static Day getDayFromDayOfWeek(DayOfWeek dayOfWeek) {
         return Arrays.stream(Day.values())
                 .filter(day -> day.dayOfWeek.equals(dayOfWeek))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 요일입니다."));
-    }
-
-    public static List<Day> getDaysOfWeeksFromInt(int daysOfWeek) {
-        List<Day> result = new ArrayList<>();
-        for (Day value : Day.values()) {
-            if ((value.getValue() & daysOfWeek) != 0) {
-                result.add(value);
-            }
-        }
-        return result;
     }
 
     public static List<Day> getSortedList(Day today) {
