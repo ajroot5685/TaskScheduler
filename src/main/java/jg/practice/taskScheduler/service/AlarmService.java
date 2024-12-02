@@ -4,8 +4,6 @@ import java.time.LocalDate;
 import jg.practice.taskScheduler.dto.request.AlarmCreateReq;
 import jg.practice.taskScheduler.dto.request.AlarmUpdateReq;
 import jg.practice.taskScheduler.entity.Alarm;
-import jg.practice.taskScheduler.entity.AlarmHistory;
-import jg.practice.taskScheduler.entity.enums.AlarmStatus;
 import jg.practice.taskScheduler.entity.enums.Day;
 import jg.practice.taskScheduler.repository.AlarmHistoryJpaRepository;
 import jg.practice.taskScheduler.repository.AlarmJpaRepository;
@@ -42,10 +40,7 @@ public class AlarmService {
         int daysOfWeek = Day.getDaysOfWeek(req.getDaysOfWeeks());
         validateRepetition(req.getDate(), daysOfWeek);
 
-        AlarmHistory alarmHistory = alarmHistoryJpaRepository.findById(req.getAlIdx())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 객체"));
-        alarmHistory.setAlStatus(AlarmStatus.CANCEL);
-        alarmHistoryJpaRepository.save(alarmHistory);
+        alarmHistoryJpaRepository.cancelPendingAlarm(req.getAlIdx());
 
         alarm.update(req.getTime(), req.getDate(), daysOfWeek);
         alarm = alarmJpaRepository.save(alarm);

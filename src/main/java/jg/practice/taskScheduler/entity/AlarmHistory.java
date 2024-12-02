@@ -47,7 +47,7 @@ public class AlarmHistory extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Setter
-    private AlarmStatus alStatus;
+    private AlarmStatus ahStatus;
 
     @Column(nullable = false)
     private LocalDateTime sendAt; // 실제 알림 발송시간
@@ -55,7 +55,7 @@ public class AlarmHistory extends BaseEntity {
     public static AlarmHistory create(Alarm alarm, LocalDateTime sendAt) {
         return AlarmHistory.builder()
                 .alarm(alarm)
-                .alStatus(AlarmStatus.PENDING)
+                .ahStatus(AlarmStatus.PENDING)
                 .sendAt(sendAt)
                 .build();
     }

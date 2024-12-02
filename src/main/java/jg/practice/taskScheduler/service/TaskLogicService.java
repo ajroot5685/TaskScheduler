@@ -25,21 +25,13 @@ public class TaskLogicService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void alarmTask(Long ahIdx) {
-        AlarmHistory alarmHistory = alarmHistoryJpaRepository.findById(ahIdx)
+        AlarmHistory alarmHistory = alarmHistoryJpaRepository.findByIdWithXLock(ahIdx)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 객체"));
 
         Alarm alarm = alarmHistory.getAlarm();
 
-        if (!alarm.isRepetition()) {
-            alarm.setActivate(false);
-            alarmJpaRepository.save(alarm);
-        } else {
-            // 다음 반복 알림 설정 - 비동기
-            alarmTaskService.registerNextRepetitionAlarm(alarm);
-        }
-
         if (alarm.isActivate()) {
-            // 기타 설정에 따라 알림 전송
+            // 기타 설정에 따라 알림 발송이 허용된 경우에 전송
             NotificationDto notificationDto = NotificationDto.builder()
                     .ahIdx(ahIdx)
                     .title("알림 제목")
@@ -49,11 +41,18 @@ public class TaskLogicService {
             eventPublisher.publishEvent(notificationDto);
         }
 
-        // 비동기 알림발송 로직에서 발송실패 시 CANCEL로 수정
+        if (!alarm.isRepetition()) {
+            alarm.setActivate(false);
+            alarmJpaRepository.save(alarm);
+        } else {
+            // 다음 반복 알림 설정 - 비동기
+            alarmTaskService.registerNextRepetitionAlarm(alarm);
+        }
 
+        // 비동기 알림발송 로직에서 발송실패 시 CANCEL로 수정
         alarmHistory.setTitle("알림 제목");
         alarmHistory.setContent("알림 내용");
-        alarmHistory.setAlStatus(AlarmStatus.COMPLETE);
+        alarmHistory.setAhStatus(AlarmStatus.COMPLETE);
         alarmHistoryJpaRepository.save(alarmHistory);
     }
 }

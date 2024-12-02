@@ -5,7 +5,6 @@ import java.time.ZoneId;
 import java.util.List;
 import jg.practice.taskScheduler.dto.AlarmTaskDto;
 import jg.practice.taskScheduler.entity.AlarmHistory;
-import jg.practice.taskScheduler.entity.enums.AlarmStatus;
 import jg.practice.taskScheduler.repository.AlarmHistoryJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -31,9 +30,9 @@ public class AlarmTaskEventListener {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    @Transactional(readOnly = true)
+    @Transactional
     public void reRegistrationPendingAlarms() {
-        List<AlarmHistory> alarmHistories = alarmHistoryJpaRepository.findAllByAlStatus(AlarmStatus.PENDING);
+        List<AlarmHistory> alarmHistories = alarmHistoryJpaRepository.findAllPendingAlarmWithSLock();
 
         alarmHistories.forEach(alarmHistory -> {
             Instant instant = alarmHistory.getSendAt().atZone(ZoneId.of("Asia/Seoul")).toInstant();
