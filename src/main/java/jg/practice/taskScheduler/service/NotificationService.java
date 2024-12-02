@@ -38,7 +38,7 @@ public class NotificationService {
             Optional<AlarmHistory> alarmHistoryOptional = alarmHistoryJpaRepository.findByIdWithXLock(
                     notificationDto.getAhIdx());
 
-            // 오류로 인해 조회되지 않더라도 오류 발생 x -> 별도로 핸들링하기
+            // 오류로 인해 조회되지 않더라도 오류 발생 x -> 별도로 핸들링하기(ex. sentry를 통해 백엔드 팀에 알림 전송하기 등)
             alarmHistoryOptional.ifPresent(alarmHistory -> {
                 alarmHistory.setAhStatus(AlarmStatus.CANCEL);
                 alarmHistoryJpaRepository.save(alarmHistory);
