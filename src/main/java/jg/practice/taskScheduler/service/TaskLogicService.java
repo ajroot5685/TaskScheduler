@@ -9,7 +9,6 @@ import jg.practice.taskScheduler.repository.AlarmJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -23,7 +22,7 @@ public class TaskLogicService {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void alarmTask(Long ahIdx) {
         AlarmHistory alarmHistory = alarmHistoryJpaRepository.findByIdWithXLock(ahIdx)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 객체"));
